@@ -1,0 +1,34 @@
+{
+    "default_agency": {
+        "agency_id": "divers",
+        "agency_name": "Divers opérateurs",
+        "agency_url": "https://wiki.openstreetmap.org/wiki/FR:WikiProject_C%C3%B4te_d'Ivoire/Transport_Abidjan",
+        "agency_timezone": "Africa/Abidjan",
+        "agency_lang": "fr",
+        "agency_phone": "",
+        "agency_fare_url": ""
+    },
+    "feed_info": {
+        "feed_publisher_name": "Jungle Bus",
+        "feed_publisher_url": "http://junglebus.io",
+        "feed_version": "0.1",
+        "feed_lang": "fr",
+        "feed_start_date": "20200101",
+        "feed_end_date": "20201231"
+    },
+    "make_stop_times": {
+        "algo": "osm_duration_tag",
+        "speed_by_mode": {
+            "ferry": 10,
+            "bus": 10
+        }
+    },
+    "default_stop_name": "[Unamed stop]",
+    "use_network_as_agency": "True",
+    "use_osm_charge_as_fare": "True",
+    "osm_filter" : {
+        "mode" : ["bus", "ferry"],
+        "operator": ["divers", "Citrans"]
+    },
+    "gtfs_output_name": "GTFS_Abidjan.zip"
+}
