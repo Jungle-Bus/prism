@@ -1,0 +1,7 @@
+__pycache__/
+tests/__pycache__/
+prism/__pycache__/
+*.py[cod]
+*$py.class
+.DS_Store
+.direnv
