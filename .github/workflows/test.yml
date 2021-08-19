@@ -1,0 +1,52 @@
+name: Test GTFS generation
+
+on:
+  push:
+
+
+jobs:
+  black-formatting-check:
+    name: Check formatting
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/setup-python@v2.2.2
+      - uses: psf/black@stable
+  test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    needs: black-formatting-check
+    strategy:
+      matrix:
+        python-version: [3.8]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2.3.4
+    - name: Setup Python
+      uses: actions/setup-python@v2.2.2
+      with:
+        python-version: ${{matrix.python-version}}
+    - name: Install poetry
+      run: |
+        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+    # Poetry still needs to be re-prepended to the PATH on each run, since
+    # PATH does not persist between runs.
+    - name: Add Poetry to $PATH
+      run: |
+        echo "$HOME/.poetry/bin" >> $GITHUB_PATH
+    - name: Install dependencies
+      run: |
+        poetry install
+        mkdir out
+        wget https://github.com/nlehuby/transport-validator/releases/download/init/etalab_transport_validator
+        chmod +x etalab_transport_validator
+        echo "$PWD/" >> $GITHUB_PATH
+    - name: Run without config file
+      run: |
+        poetry run python prism/cli.py tests/data/osm/abidjan_test_data.osm.pbf --outdir out/ --loglevel=DEBUG
+    - name: Run with config file
+      run: |
+        poetry run python prism/cli.py tests/data/osm/abidjan_test_data.osm.pbf --outdir out/ --config example_config.json
+    - name: Test, eventually
+      run: poetry run pytest -v --runxfail
