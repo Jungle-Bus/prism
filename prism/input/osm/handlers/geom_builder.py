@@ -33,9 +33,38 @@ def build_geom_from_ways(relation_id, ways_list, full_details_of_ways):
             # this is a roundabout
             last_roundabout_nodes = current_way.points_list
         elif last_roundabout_nodes:
+            roundabout_start_index = last_roundabout_nodes.index(latlon_list[-1])
             if current_way.points_list[0] in last_roundabout_nodes:
+                roundabout_end_index = last_roundabout_nodes.index(
+                    current_way.points_list[0]
+                )
+                if roundabout_end_index < roundabout_start_index:
+                    del latlon_list[-1]
+                    latlon_list.extend(last_roundabout_nodes[roundabout_start_index:-1])
+                    latlon_list.extend(last_roundabout_nodes[1:roundabout_end_index])
+                else:
+                    del latlon_list[-1]
+                    latlon_list.extend(
+                        last_roundabout_nodes[
+                            roundabout_start_index:roundabout_end_index
+                        ]
+                    )
                 latlon_list.extend(current_way.points_list)
             elif current_way.points_list[-1] in last_roundabout_nodes:
+                roundabout_end_index = last_roundabout_nodes.index(
+                    current_way.points_list[-1]
+                )
+                if roundabout_end_index < roundabout_start_index:
+                    del latlon_list[-1]
+                    latlon_list.extend(last_roundabout_nodes[roundabout_start_index:-1])
+                    latlon_list.extend(last_roundabout_nodes[1:roundabout_end_index])
+                else:
+                    del latlon_list[-1]
+                    latlon_list.extend(
+                        last_roundabout_nodes[
+                            roundabout_start_index:roundabout_end_index
+                        ]
+                    )
                 latlon_list.extend(reversed(current_way.points_list))
             else:
                 logging.warning(
