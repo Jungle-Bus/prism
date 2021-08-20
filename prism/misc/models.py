@@ -24,6 +24,7 @@ Route = namedtuple(
         "route_type",
         "route_url",
         "route_color",
+        "route_text_color",
         "agency_id",
     ],
 )

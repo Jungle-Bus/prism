@@ -1,5 +1,6 @@
 import webcolors
 import logging
+from math import sqrt
 
 from prism.misc.models import Route
 from prism.output.gtfs.builders.agency_builder import get_agency_id
@@ -20,19 +21,20 @@ def build_routes(osm_lines, osm_routes, config):
     use_network_as_agency = config["use_network_as_agency"]
 
     for osm_line in osm_lines:
+        color, txt_color = create_route_colors(osm_line)
         yield Route(
             osm_line.id,
             create_route_short_name(osm_line),
             create_route_long_name(osm_line, osm_routes),
             create_route_type(osm_line),
             create_route_url(osm_line),
-            create_route_color(osm_line),
+            color,
+            txt_color,
             get_agency_id(osm_line, config),
         )
 
 
 def create_route_short_name(osm_line):
-    """Create a meaningful route short name."""
     return osm_line.tags.get("ref") or ""
 
 
@@ -76,14 +78,12 @@ def create_route_long_name(osm_line, osm_routes):
 
 
 def create_route_url(osm_line):
-    """Create a meaningful route url."""
     return "https://jungle-bus.github.io/unroll/route.html?line={}".format(
         osm_line.id[1:]
     )
 
 
-def create_route_color(osm_line):
-    """Create a meaningful route color."""
+def create_route_colors(osm_line):
     osm_colour = osm_line.tags.get("colour") or osm_line.tags.get("vehicle:colour")
     if osm_colour:
         try:
@@ -99,5 +99,21 @@ def create_route_color(osm_line):
                         osm_colour, osm_line.id
                     )
                 )
-        return osm_colour.strip("#")
-    return ""
+                return ("", "")
+
+        text_colour = "000000"
+        # for the text, choose between black and white to maximise contrast
+        red, green, blue = (
+            int(osm_colour[1:3], 16),
+            int(osm_colour[3:5], 16),
+            int(osm_colour[5:7], 16),
+        )
+        brightness = sqrt(
+            red * red * 0.241 + green * green * 0.691 + blue * blue * 0.068
+        )
+        if brightness <= 130:
+            text_colour = "ffffff"
+
+        return (osm_colour.strip("#"), text_colour)
+
+    return ("", "")
