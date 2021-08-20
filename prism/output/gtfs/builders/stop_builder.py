@@ -32,7 +32,9 @@ def create_stop_wheelchair_boarding(osm_stop):
         return 2
     else:
         logging.warning(
-            "OSM QA : Unknown OSM wheelchair tag {} on {}", wheelchair_tag, osm_stop.id
+            "OSM QA : Unknown OSM wheelchair tag {} on {}".format(
+                wheelchair_tag, osm_stop.id
+            )
         )
         return 0
 
