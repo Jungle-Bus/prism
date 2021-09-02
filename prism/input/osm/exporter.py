@@ -10,6 +10,11 @@ from prism.output.gtfs.builders import (
     build_fares,
     build_schedules,
 )
+from prism.output.csv.builders import (
+    build_csv_stop_points_export,
+    build_csv_lines_export,
+    build_csv_routes_export,
+)
 
 
 class TransitDataExporter(object):
@@ -50,6 +55,18 @@ class TransitDataExporter(object):
             self.geom,
             self.config,
         )
+
+    @property
+    def csv_stop_points(self):
+        return build_csv_stop_points_export(self.nodes.stops, self.config)
+
+    @property
+    def csv_lines(self):
+        return build_csv_lines_export(self.relations.lines, self.geom, self.config)
+
+    @property
+    def csv_routes(self):
+        return build_csv_routes_export(self.relations.routes, self.geom, self.config)
 
     def extract(self):
         # Extract relations

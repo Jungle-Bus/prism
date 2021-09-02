@@ -44,9 +44,9 @@ jobs:
         echo "$PWD/" >> $GITHUB_PATH
     - name: Run without config file
       run: |
-        poetry run python prism/cli.py tests/data/osm/abidjan_test_data.osm.pbf --outdir out/ --loglevel=DEBUG
+        poetry run python prism/cli.py tests/data/osm/abidjan_test_data.osm.pbf --outdir out/ --loglevel=DEBUG -gtfs -csv
     - name: Run with config file
       run: |
-        poetry run python prism/cli.py tests/data/osm/abidjan_test_data.osm.pbf --outdir out/ --config example_config.json
+        poetry run python prism/cli.py tests/data/osm/abidjan_test_data.osm.pbf --outdir out/ --config example_config.json --output-gtfs --output-csv
     - name: Test, eventually
       run: poetry run pytest -v --runxfail

@@ -4,9 +4,9 @@ Prism is a tool for extracting public transport routes from OpenStreetMap. It al
 
 ## Use
 
-`poetry run python prism/cli.py tests/data/osm/abidjan_test_data.osm.pbf --outdir out/ --loglevel=DEBUG`
+`poetry run python prism/cli.py tests/data/osm/abidjan_test_data.osm.pbf --outdir out/ --loglevel=DEBUG -csv -gtfs`
 
-`poetry run python prism/cli.py tests/data/osm/abidjan_test_data.osm.pbf --outdir out/ --loglevel=DEBUG --config example_config.json`
+`poetry run python prism/cli.py tests/data/osm/abidjan_test_data.osm.pbf --outdir out/ --loglevel=DEBUG --config example_config.json -csv -gtfs`
 
 ## Credits
 
