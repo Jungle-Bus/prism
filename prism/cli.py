@@ -139,16 +139,16 @@ def export_osm_data(osm_file, outdir, config, output_gtfs, output_csv):
             if checked_config.data["use_osm_charge_as_fare"]:
                 writer.add_fares(osm_transit_data.gtfs_fares)
             writer.add_feedinfo(checked_config.data["feed_info_to_use"])
-            writer.add_attributions(
-                {
-                    "attribution_id": "42",
-                    "organization_name": "Jungle Bus, © OpenStreetMap contributors",
-                    "is_producer": "1",
-                    "is_operator": "0",
-                    "is_authority": "0",
-                    "attribution_url": "https://www.openstreetmap.org/copyright",
-                }
-            )
+            # writer.add_attributions(
+            #    {
+            #        "attribution_id": "42",
+            #        "organization_name": "Jungle Bus, © OpenStreetMap contributors",
+            #        "is_producer": "1",
+            #        "is_operator": "0",
+            #        "is_authority": "0",
+            #        "attribution_url": "https://www.openstreetmap.org/copyright",
+            #    }
+            # )
 
             zip_file_path = os.path.join(
                 outdir, checked_config.data["gtfs_output_name"]
