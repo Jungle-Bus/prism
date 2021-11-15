@@ -184,7 +184,7 @@ CSVFilesWithHeaders = {
         "shape",
     ],
     "line_routes": ["line_id", "route_id"],
-    "route_stops": ["route_id", "stop_point_id"],
+    "route_stops": ["route_id", "stop_point_id", "stop_point_index"],
     "routes": [
         "route_id",
         "name",

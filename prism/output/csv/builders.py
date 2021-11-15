@@ -54,8 +54,12 @@ def build_csv_routes_export(osm_routes, routes_geom, config):
             }
         )
         stops = [
-            {"route_id": osm_route.id, "stop_point_id": stop_point}
-            for stop_point in osm_route.stops_list
+            {
+                "route_id": osm_route.id,
+                "stop_point_id": stop_point,
+                "stop_point_index": index + 1,
+            }
+            for index, stop_point in enumerate(osm_route.stops_list)
         ]
         route_stop_mapping += stops
     return routes, route_stop_mapping
