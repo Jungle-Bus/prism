@@ -44,6 +44,9 @@ def build_schedules(osm_lines, osm_routes, osm_stops, osm_geom, config):
         for route_index, route_id in enumerate(line.routes_list):
             route = osm_routes.get(route_id)
 
+            if not route:
+                continue
+
             opening_hours = route.tags.get("opening_hours") or line.tags.get(
                 "opening_hours"
             )
