@@ -177,7 +177,13 @@ class Configuration(object):
         """
         default = {
             "algo": "speed_by_mode",
-            "speed_by_mode": {"bus": 20, "ferry": 15, "train": 70},
+            "speed_by_mode": {
+                "bus": 20,
+                "ferry": 15,
+                "train": 70,
+                "tram": 25,
+                "subway": 30,
+            },
         }
 
         how_to = self.from_user.get("make_stop_times")
