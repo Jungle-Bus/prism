@@ -140,7 +140,16 @@ def create_gtfs_stop_times_for_a_route(a_route, stop_list, trip_id, config):
 
     stop_times = []
 
-    distances_list = get_distances_between_all_stops(a_route.stops_list, stop_list)
+    # Make sure that we already know all stops in a_route
+    a_route_stops_list = [elem for elem in a_route.stops_list if elem in stop_list]
+    if len(a_route.stops_list) != len(a_route_stops_list):
+        logging.warning(
+            "Missing some nodes details in OSM data (to create schedule for {} route)".format(
+                a_route.id
+            )
+        )
+
+    distances_list = get_distances_between_all_stops(a_route_stops_list, stop_list)
     speed = get_default_speed_for_route(a_route, config) * 1000 / 60  # meters / min
     if config["make_stop_times"]["algo"] == "osm_duration_tag":
         trip_duration = get_trip_duration(a_route)
@@ -165,7 +174,7 @@ def create_gtfs_stop_times_for_a_route(a_route, stop_list, trip_id, config):
     ]
 
     departure_time = datetime(2008, 11, 22, 6, 0, 0)
-    for stop_index, stop_id in enumerate(a_route.stops_list):
+    for stop_index, stop_id in enumerate(a_route_stops_list):
         stop = stop_list.get(stop_id)
 
         stop_time = {
