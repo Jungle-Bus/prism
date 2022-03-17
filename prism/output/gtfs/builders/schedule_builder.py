@@ -30,7 +30,6 @@ _DAY_ABBREVIATIONS = {
 
 
 def build_schedules(osm_lines, osm_routes, osm_stops, osm_geom, config):
-    stops_per_route = defaultdict(lambda: [])
 
     services = {}
     trips = {}
@@ -38,6 +37,8 @@ def build_schedules(osm_lines, osm_routes, osm_stops, osm_geom, config):
     stop_times = []
 
     transport_hours = transporthours.main.Main()
+
+    departures_by_route_id = config["enumerate_trips"]["departures_by_route_id"]
 
     for line in osm_lines:
 
@@ -47,92 +48,160 @@ def build_schedules(osm_lines, osm_routes, osm_stops, osm_geom, config):
             if not route:
                 continue
 
-            opening_hours = route.tags.get("opening_hours") or line.tags.get(
-                "opening_hours"
-            )
-            if not opening_hours:
-                opening_hours = _DEFAULT_SCHEDULE["opening_hours"]
-                logging.warning(
-                    "OSM QA : Missing opening_hours on OSM line {} or OSM route {}".format(
-                        line.id, route.id
-                    )
+            if route_id in departures_by_route_id:
+                logging.debug(
+                    "Departures used to enumerate trips for route {}".format(route_id)
                 )
 
-            interval = (
-                route.tags.get("interval")
-                or line.tags.get("interval")
-                or line.tags.get("frequency")
-            )
-            if not interval:
-                interval = _DEFAULT_SCHEDULE["interval"]
-                logging.warning(
-                    "OSM QA : Missing frequency (interval tag) on OSM line {} or OSM route {}".format(
-                        line.id, route.id
-                    )
-                )
-
-            interval_conditional = (
-                route.tags.get("interval:conditional")
-                or line.tags.get("interval:conditional")
-                or ""
-            )
-
-            route_hours_list = transport_hours.tagsToGtfs(
-                {
-                    "opening_hours": opening_hours,
-                    "interval": interval,
-                    "interval:conditional": interval_conditional,
+                default_service = {
+                    "service_id": "default",
+                    "monday": 1,
+                    "tuesday": 1,
+                    "wednesday": 1,
+                    "thursday": 1,
+                    "friday": 1,
+                    "saturday": 1,
+                    "sunday": 1,
+                    "start_date": config["feed_info_to_use"]["feed_start_date"],
+                    "end_date": config["feed_info_to_use"]["feed_end_date"],
                 }
-            )
+                if "default" not in services:
+                    services["default"] = default_service
 
-            route_hours_dict = group_hours_by_service_period(route_hours_list)
-
-            for service_id, route_hours in route_hours_dict.items():
-                trip_id = "{}_{}".format(route_id, service_id)
-                shape_id = ""
-                if route_id in osm_geom:
-                    shape_id = route_id
-                trips[trip_id] = {
-                    "route_id": line.id,
-                    "service_id": service_id,
-                    "shape_id": shape_id,
-                    "trip_id": trip_id,
-                    "direction_id": route_index % 2,
-                    "trip_headsign": route.tags.get("to") or "",
-                }
-
-                if not service_id in services:
-                    services[service_id] = {
-                        "service_id": service_id,
-                        "monday": int(route_hours[0]["monday"]),
-                        "tuesday": int(route_hours[0]["tuesday"]),
-                        "wednesday": int(route_hours[0]["wednesday"]),
-                        "thursday": int(route_hours[0]["thursday"]),
-                        "friday": int(route_hours[0]["friday"]),
-                        "saturday": int(route_hours[0]["saturday"]),
-                        "sunday": int(route_hours[0]["sunday"]),
-                        "start_date": config["feed_info_to_use"]["feed_start_date"],
-                        "end_date": config["feed_info_to_use"]["feed_end_date"],
+                for departure_index, departure_detail in enumerate(
+                    departures_by_route_id[route_id]
+                ):
+                    trip_id = "{}#{}".format(route_id, departure_index)
+                    shape_id = ""
+                    if route_id in osm_geom:
+                        shape_id = route_id
+                    trips[trip_id] = {
+                        "route_id": line.id,
+                        "service_id": "default",
+                        "shape_id": shape_id,
+                        "trip_id": trip_id,
+                        "direction_id": route_index % 2,
+                        "trip_headsign": route.tags.get("to") or "",
                     }
 
-                for route_hour in route_hours:
-                    frequencies.append(
-                        {
-                            "trip_id": trip_id,
-                            "start_time": route_hour["start_time"],
-                            "end_time": route_hour["end_time"],
-                            "headway_secs": route_hour["headway"],
-                        }
+                    first_index = None
+                    last_index = None
+                    if departure_detail["first_stop_index"]:
+                        first_index = int(departure_detail["first_stop_index"])
+                    if departure_detail["last_stop_index"]:
+                        last_index = int(departure_detail["last_stop_index"])
+
+                    stop_times += create_gtfs_stop_times_for_a_route(
+                        route,
+                        osm_stops,
+                        trip_id,
+                        departure_detail["departure"],
+                        config,
+                        a_route_stop_first_index=first_index,
+                        a_route_stop_last_index=last_index,
                     )
 
-                stop_times += create_gtfs_stop_times_for_a_route(
-                    route, osm_stops, trip_id, config
+            else:
+                logging.debug(
+                    "Frequencies from OSM used to enumerate trips for route {}".format(
+                        route_id
+                    )
                 )
+
+                opening_hours = route.tags.get("opening_hours") or line.tags.get(
+                    "opening_hours"
+                )
+                if not opening_hours:
+                    opening_hours = _DEFAULT_SCHEDULE["opening_hours"]
+                    logging.warning(
+                        "OSM QA : Missing opening_hours on OSM line {} or OSM route {}".format(
+                            line.id, route.id
+                        )
+                    )
+
+                interval = (
+                    route.tags.get("interval")
+                    or line.tags.get("interval")
+                    or line.tags.get("frequency")
+                )
+                if not interval:
+                    interval = _DEFAULT_SCHEDULE["interval"]
+                    logging.warning(
+                        "OSM QA : Missing frequency (interval tag) on OSM line {} or OSM route {}".format(
+                            line.id, route.id
+                        )
+                    )
+
+                interval_conditional = (
+                    route.tags.get("interval:conditional")
+                    or line.tags.get("interval:conditional")
+                    or ""
+                )
+
+                route_hours_list = transport_hours.tagsToGtfs(
+                    {
+                        "opening_hours": opening_hours,
+                        "interval": interval,
+                        "interval:conditional": interval_conditional,
+                    }
+                )
+
+                route_hours_dict = group_hours_by_service_period(route_hours_list)
+
+                for service_id, route_hours in route_hours_dict.items():
+                    trip_id = "{}_{}".format(route_id, service_id)
+                    shape_id = ""
+                    if route_id in osm_geom:
+                        shape_id = route_id
+                    trips[trip_id] = {
+                        "route_id": line.id,
+                        "service_id": service_id,
+                        "shape_id": shape_id,
+                        "trip_id": trip_id,
+                        "direction_id": route_index % 2,
+                        "trip_headsign": route.tags.get("to") or "",
+                    }
+
+                    if not service_id in services:
+                        services[service_id] = {
+                            "service_id": service_id,
+                            "monday": int(route_hours[0]["monday"]),
+                            "tuesday": int(route_hours[0]["tuesday"]),
+                            "wednesday": int(route_hours[0]["wednesday"]),
+                            "thursday": int(route_hours[0]["thursday"]),
+                            "friday": int(route_hours[0]["friday"]),
+                            "saturday": int(route_hours[0]["saturday"]),
+                            "sunday": int(route_hours[0]["sunday"]),
+                            "start_date": config["feed_info_to_use"]["feed_start_date"],
+                            "end_date": config["feed_info_to_use"]["feed_end_date"],
+                        }
+
+                    for route_hour in route_hours:
+                        frequencies.append(
+                            {
+                                "trip_id": trip_id,
+                                "start_time": route_hour["start_time"],
+                                "end_time": route_hour["end_time"],
+                                "headway_secs": route_hour["headway"],
+                            }
+                        )
+
+                    stop_times += create_gtfs_stop_times_for_a_route(
+                        route, osm_stops, trip_id, None, config
+                    )
 
     return GTFSSchedule(services.values(), stop_times, trips.values(), frequencies)
 
 
-def create_gtfs_stop_times_for_a_route(a_route, stop_list, trip_id, config):
+def create_gtfs_stop_times_for_a_route(
+    a_route,
+    stop_list,
+    trip_id,
+    departure_time,
+    config,
+    a_route_stop_first_index=None,
+    a_route_stop_last_index=None,
+):
     """
     Create GTFS stop_times by computing duration between each stop inside the route
     according to the algo specified in config
@@ -148,6 +217,10 @@ def create_gtfs_stop_times_for_a_route(a_route, stop_list, trip_id, config):
                 a_route.id
             )
         )
+    if a_route_stop_first_index:
+        a_route_stops_list = a_route_stops_list[a_route_stop_first_index - 1 :]
+    elif a_route_stop_last_index:
+        a_route_stops_list = a_route_stops_list[0:a_route_stop_last_index]
 
     distances_list = get_distances_between_all_stops(a_route_stops_list, stop_list)
     speed = get_default_speed_for_route(a_route, config) * 1000 / 60  # meters / min
@@ -173,7 +246,7 @@ def create_gtfs_stop_times_for_a_route(a_route, stop_list, trip_id, config):
         for distance_between_two_stops in distances_list
     ]
 
-    departure_time = datetime(2008, 11, 22, 6, 0, 0)
+    departure_time = departure_time or datetime(2008, 11, 22, 6, 0, 0)
     for stop_index, stop_id in enumerate(a_route_stops_list):
         stop = stop_list.get(stop_id)
 

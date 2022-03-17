@@ -14,6 +14,9 @@ def test_no_config(request):
     assert config["make_stop_times"]["algo"] == "speed_by_mode"
     assert config["make_stop_times"]["speed_by_mode"]["bus"] == 20
 
+    assert config["enumerate_trips"]["algo"] == "osm_interval_tag"
+    assert config["enumerate_trips"]["departures_by_route_id"] == {}
+
     assert "feed_start_date" in config["feed_info_to_use"]
 
     assert config["gtfs_output_name"] == "output_gtfs.zip"
@@ -33,6 +36,7 @@ def test_sample_config(request):
             "algo": "osm_duration_tag",
             "speed_by_mode": {"ferry": "25", "bateau-bus": "25"},
         },
+        "enumerate_trips": {"algo": "osm_interval_tag"},
         "default_stop_name": "[Unamed stop]",
         "use_osm_charge_as_fare": "True",
         "use_network_as_agency": "True",
@@ -51,6 +55,9 @@ def test_sample_config(request):
     assert config["make_stop_times"]["algo"] == "osm_duration_tag"
     assert config["make_stop_times"]["speed_by_mode"]["bus"] == 20
     assert config["make_stop_times"]["speed_by_mode"]["ferry"] == 25
+
+    assert config["enumerate_trips"]["algo"] == "osm_interval_tag"
+    assert config["enumerate_trips"]["departures_by_route_id"] == {}
 
     assert config["feed_info_to_use"]["feed_start_date"] == "20200101"
 

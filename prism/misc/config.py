@@ -1,6 +1,7 @@
 import logging
 import os
 import json
+import csv
 
 from datetime import timedelta, datetime
 
@@ -22,6 +23,7 @@ class Configuration(object):
         self.prepare_osm_filters()
         self.prepare_use_charge_as_fare()
         self.prepare_algo_to_compute_GTFS_stop_times()
+        self.prepare_algo_to_enumerate_GTFS_trips()
         self.prepare_feed_info()
         self.prepare_dates()
         self.prepare_gtfs_output_file_name()
@@ -232,6 +234,87 @@ class Configuration(object):
         for mode, speed in default["speed_by_mode"].items():
             if mode not in self.data["make_stop_times"]["speed_by_mode"]:
                 self.data["make_stop_times"]["speed_by_mode"][mode] = speed
+
+    def prepare_algo_to_enumerate_GTFS_trips(self):
+        """
+        Specifies how to enumerate the trips for each route of a GTFS
+        With osm_interval_tag algo (default and fallback): use the interval, opening_hours, and interval:conditional tags
+            on OSM route_master or route objets. It will create one trip for each day period and add frequencies.
+        With departures_at_first_stop_as_csv algo: use an external file with time of departure at the first stop of each
+            GTFS trip. It will create as much trips. External file path goes in external_schedule_file attribute,
+            it should be a csv file with the following columns:
+                - route_id (matching OSM route osm_id)
+                - departure_time (for instance 07:40:00)
+                - first_stop_index (index of the first stop to use in trip, starting at 1. Optional, will start at first stop if not provided)
+                - last_stop_index (index of the last stop to use in trip, starting at 1. Optional, will use all the stops if not provided)
+        """
+        default = {
+            "algo": "osm_interval_tag",
+            "use_default_interval_if_empty": True,  # TODO
+            "departures_by_route_id": {},
+        }
+        how_to = self.from_user.get("enumerate_trips")
+        if not how_to:
+            self.data["enumerate_trips"] = default
+            return
+
+        algo = self.from_user["enumerate_trips"].get("algo")
+        if algo not in ["osm_interval_tag", "departures_at_first_stop_as_csv"]:
+            logging.error(
+                "No valid algo to enumerate trips found in config file, will use interval and opening_hours tags in OSM"
+            )
+            self.data["enumerate_trips"] = default
+            return
+
+        self.data["enumerate_trips"] = {"algo": algo}
+        self.data["enumerate_trips"]["departures_by_route_id"] = {}
+
+        # handle use_default_interval_if_empty here #TODO
+
+        if self.data["enumerate_trips"]["algo"] == "departures_at_first_stop_as_csv":
+            external_file_path = self.from_user["enumerate_trips"].get(
+                "external_schedule_file"
+            )
+            if not external_file_path:
+                logging.error(
+                    "No external file path for departures found in config file, will use interval and opening_hours tags in OSM instead"
+                )
+                self.data["enumerate_trips"] = default
+                return
+            if not os.path.isfile(external_file_path):
+                logging.error(
+                    "Unable to find external file path for departures found using config file, will use interval and opening_hours tags in OSM instead"
+                )
+                self.data["enumerate_trips"] = default
+                return
+
+            departures_by_route_id = {}
+            try:
+                with open(external_file_path, "r") as csv_file:
+                    csv_reader = csv.DictReader(csv_file, delimiter=",")
+                    for row in csv_reader:
+                        if row["route_id"] not in departures_by_route_id:
+                            departures_by_route_id[row["route_id"]] = []
+                        if not "first_stop_index" in row:
+                            row["first_stop_index"] = None
+                        if not "last_stop_index" in row:
+                            row["last_stop_index"] = None
+                        departures_by_route_id[row["route_id"]].append(
+                            {
+                                "departure": datetime.strptime(
+                                    row["departure_time"], "%H:%M:%S"
+                                ),
+                                "first_stop_index": row["first_stop_index"] or None,
+                                "last_stop_index": row["last_stop_index"] or None,
+                            }
+                        )
+                self.data["enumerate_trips"][
+                    "departures_by_route_id"
+                ] = departures_by_route_id
+            except Exception as e:
+                logging.error(
+                    "Unable to process external file path for departures found using config file: {}. Will use interval and opening_hours tags in OSM instead"
+                )
 
     def prepare_dates(self):
         """
