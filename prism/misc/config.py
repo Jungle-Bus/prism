@@ -250,9 +250,11 @@ class Configuration(object):
         """
         default = {
             "algo": "osm_interval_tag",
-            "use_default_interval_if_empty": True,  # TODO
+            "use_default_interval_if_empty": True,
             "departures_by_route_id": {},
         }
+        self.data["enumerate_trips"] = default
+
         how_to = self.from_user.get("enumerate_trips")
         if not how_to:
             self.data["enumerate_trips"] = default
@@ -266,10 +268,16 @@ class Configuration(object):
             self.data["enumerate_trips"] = default
             return
 
-        self.data["enumerate_trips"] = {"algo": algo}
-        self.data["enumerate_trips"]["departures_by_route_id"] = {}
+        self.data["enumerate_trips"]["algo"] = algo
 
-        # handle use_default_interval_if_empty here #TODO
+        if self.from_user["enumerate_trips"].get("use_default_interval_if_empty") in [
+            "False",
+            "no",
+            "0",
+        ]:
+            self.data["enumerate_trips"]["use_default_interval_if_empty"] = False
+        else:
+            self.data["enumerate_trips"]["use_default_interval_if_empty"] = True
 
         if self.data["enumerate_trips"]["algo"] == "departures_at_first_stop_as_csv":
             external_file_path = self.from_user["enumerate_trips"].get(

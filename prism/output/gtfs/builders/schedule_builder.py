@@ -102,11 +102,7 @@ def build_schedules(osm_lines, osm_routes, osm_stops, osm_geom, config):
                     )
 
             else:
-                logging.debug(
-                    "Frequencies from OSM used to enumerate trips for route {}".format(
-                        route_id
-                    )
-                )
+                write_frequencies = True
 
                 opening_hours = route.tags.get("opening_hours") or line.tags.get(
                     "opening_hours"
@@ -131,6 +127,21 @@ def build_schedules(osm_lines, osm_routes, osm_stops, osm_geom, config):
                             line.id, route.id
                         )
                     )
+                    if not config["enumerate_trips"]["use_default_interval_if_empty"]:
+                        write_frequencies = False
+                
+                if write_frequencies:
+                    logging.debug(
+                        "Frequencies from OSM used to enumerate trips for route {}".format(
+                            route_id
+                        )
+                    )
+                else:
+                    logging.debug(
+                        "Will only generate one trip for route {}".format(
+                            route_id
+                        )
+                    )                    
 
                 interval_conditional = (
                     route.tags.get("interval:conditional")
@@ -176,15 +187,16 @@ def build_schedules(osm_lines, osm_routes, osm_stops, osm_geom, config):
                             "end_date": config["feed_info_to_use"]["feed_end_date"],
                         }
 
-                    for route_hour in route_hours:
-                        frequencies.append(
-                            {
-                                "trip_id": trip_id,
-                                "start_time": route_hour["start_time"],
-                                "end_time": route_hour["end_time"],
-                                "headway_secs": route_hour["headway"],
-                            }
-                        )
+                    if write_frequencies:
+                        for route_hour in route_hours:
+                            frequencies.append(
+                                {
+                                    "trip_id": trip_id,
+                                    "start_time": route_hour["start_time"],
+                                    "end_time": route_hour["end_time"],
+                                    "headway_secs": route_hour["headway"],
+                                }
+                            )
 
                     stop_times += create_gtfs_stop_times_for_a_route(
                         route, osm_stops, trip_id, None, config
