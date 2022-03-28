@@ -89,6 +89,8 @@ class TransitDataExporter(object):
         logging.debug("Found %d ways", len(self.ways.ways))
 
         # Transform ways to route geom
-        self.geom = get_geom_for_routes(self.relations.routes, self.ways.ways)
+        self.geom = get_geom_for_routes(
+            self.relations.routes, self.ways.ways, self.nodes.stops
+        )
 
         logging.debug("Built %d geom for public transport routes", len(self.geom))

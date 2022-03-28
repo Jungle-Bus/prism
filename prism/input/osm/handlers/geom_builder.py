@@ -1,18 +1,24 @@
 import logging
+from prism.misc.helpers import crow_fly_distance
 
 
-def get_geom_for_routes(routes_details, ways_details):
+def get_geom_for_routes(routes_details, ways_details, stops_details):
     geom = {}
     for osm_route in routes_details.values():
+        first_stop_details = None
+        if osm_route.stops_list:
+            first_stop_details = stops_details.get(osm_route.stops_list[0])
         route_geom = build_geom_from_ways(
-            osm_route.id, osm_route.ways_list, ways_details
+            osm_route.id, osm_route.ways_list, ways_details, first_stop_details
         )
         if route_geom:
             geom[osm_route.id] = route_geom
     return geom
 
 
-def build_geom_from_ways(relation_id, ways_list, full_details_of_ways):
+def build_geom_from_ways(
+    relation_id, ways_list, full_details_of_ways, details_of_first_stop
+):
     """Build the geom of the route as a linestring (list of LatLon)"""
     latlon_list = []
 
@@ -95,5 +101,22 @@ def build_geom_from_ways(relation_id, ways_list, full_details_of_ways):
                 )
             )
             return
+
+    # if only one way in OSM way list, we may need to reverse it
+    if len(ways_list) == 1 and details_of_first_stop:
+        distance_from_first_geom_point = crow_fly_distance(
+            details_of_first_stop.lon,
+            details_of_first_stop.lat,
+            latlon_list[0].lon,
+            latlon_list[0].lat,
+        )
+        distance_from_last_geom_point = crow_fly_distance(
+            details_of_first_stop.lon,
+            details_of_first_stop.lat,
+            latlon_list[-1].lon,
+            latlon_list[-1].lat,
+        )
+        if distance_from_first_geom_point > distance_from_last_geom_point:
+            latlon_list.reverse()
 
     return latlon_list
