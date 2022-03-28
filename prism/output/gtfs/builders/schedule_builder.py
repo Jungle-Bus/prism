@@ -129,7 +129,7 @@ def build_schedules(osm_lines, osm_routes, osm_stops, osm_geom, config):
                     )
                     if not config["enumerate_trips"]["use_default_interval_if_empty"]:
                         write_frequencies = False
-                
+
                 if write_frequencies:
                     logging.debug(
                         "Frequencies from OSM used to enumerate trips for route {}".format(
@@ -138,10 +138,8 @@ def build_schedules(osm_lines, osm_routes, osm_stops, osm_geom, config):
                     )
                 else:
                     logging.debug(
-                        "Will only generate one trip for route {}".format(
-                            route_id
-                        )
-                    )                    
+                        "Will only generate one trip for route {}".format(route_id)
+                    )
 
                 interval_conditional = (
                     route.tags.get("interval:conditional")
@@ -258,7 +256,8 @@ def create_gtfs_stop_times_for_a_route(
         for distance_between_two_stops in distances_list
     ]
 
-    departure_time = departure_time or datetime(2008, 11, 22, 6, 0, 0)
+    departure_time = departure_time or datetime(1991, 1, 29, 6, 0, 0)
+    first_departure_of_trip = departure_time
     for stop_index, stop_id in enumerate(a_route_stops_list):
         stop = stop_list.get(stop_id)
 
@@ -279,6 +278,15 @@ def create_gtfs_stop_times_for_a_route(
             _time = departure_time.strftime("%H:%M:%S")
             stop_time["departure_time"] = _time
             stop_time["arrival_time"] = _time
+            if (
+                departure_time.day != first_departure_of_trip.day
+            ):  # after midnight times needs to be greater than 24:MM:SS
+                stop_time["departure_time"] = "{}:{:02d}:{:02d}".format(
+                    departure_time.hour + 24,
+                    departure_time.minute,
+                    departure_time.second,
+                )
+                stop_time["arrival_time"] = stop_time["departure_time"]
 
         stop_times.append(stop_time)
     return stop_times
