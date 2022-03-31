@@ -1,0 +1,94 @@
+{
+    "data_format": 1,
+    "project": {
+        "name": "Prism (by Jungle Bus)",
+        "description": "Prism is a tool to extract public transport data from OpenStreetMap, in geoCSV and GTFS format",
+        "project_url": "https://github.com/Jungle-Bus/prism/",
+        "icon_url": "https://raw.githubusercontent.com/Jungle-Bus/resources/master/logo/Logo_Jungle_Bus-Prism.png",
+        "contact_name": "Noémie Lehuby",
+        "contact_email": "noemie@junglebus.io"
+    },
+    "tags": [{
+            "key": "type",
+            "value": "route_master",
+            "object_types": ["relation"],
+            "description": "to select the public transport line objects. Used to create GTFS routes"
+        },
+        {
+            "key": "type",
+            "value": "route",
+            "object_types": ["relation"],
+            "description": "to select the public transport route objects"
+        },
+        {
+            "key": "ref",
+            "object_types": ["relation"],
+            "description": "Extracted as the code of the public transport line. Used as route_short_name in the GTFS"
+        },
+        {
+            "key": "to",
+            "object_types": ["relation"],
+            "description": "Extracted as the destination of the public transport route. Used as trip_headsign in the GTFS"
+        },
+        {
+            "key": "from",
+            "object_types": ["relation"],
+            "description": "Extracted as the origin of the public transport route"
+        },
+        {
+            "key": "colour",
+            "object_types": ["relation"],
+            "description": "Extracted as the colour of the public transport line or route. Used as route_color in the GTFS"
+        },
+        {
+            "key": "vehicle:colour",
+            "object_types": ["relation"],
+            "description": "the colour of the public transport vehicle. Can be used as route_color in the GTFS"
+        },
+        {
+            "key": "operator",
+            "object_types": ["relation"],
+            "description": "Extracted as the name of the public transport operator. Used to create GTFS agencies"
+        },
+        {
+            "key": "network",
+            "object_types": ["relation"],
+            "description": "Extracted as the name of the public transport network. Can be used to create GTFS agencies"
+        },
+        {
+            "key": "route",
+            "object_types": ["relation"],
+            "description": "Extracted as the public transport mode of the route"
+        },
+        {
+            "key": "route_master",
+            "object_types": ["relation"],
+            "description": "Extracted as the public transport mode of the line. Used to compute the route_type in the GTFS"
+        },
+        {
+            "key": "charge",
+            "object_types": ["relation"],
+            "description": "Extracted as the price of the public transport line. Can be used to create GTFS fares"
+        },
+        {
+            "key": "interval",
+            "object_types": ["relation"],
+            "description": "Extracted as the main frequency of the public transport line. Used to define the trips, frequencies and stop_times in the GTFS"
+        },
+        {
+            "key": "duration",
+            "object_types": ["relation"],
+            "description": "Extracted as the travel time of the public transport route. Can be used to compute the stop_times in the GTFS"
+        },
+        {
+            "key": "interval:conditional",
+            "object_types": ["relation"],
+            "description": "Extracted as the exceptions to the main frequency. Used to define the frequencies and stop_times in the GTFS"
+        },
+        {
+            "key": "opening_hours",
+            "object_types": ["relation"],
+            "description": "Extracted as the operating hours of the public transport line. Used to define the trips, services and stop_times in the GTFS"
+        }
+    ]
+}
