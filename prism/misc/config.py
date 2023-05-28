@@ -29,7 +29,6 @@ class Configuration(object):
         self.prepare_gtfs_output_file_name()
 
     def load_config(self, config_args):
-
         if config_args is None:
             return {}
 

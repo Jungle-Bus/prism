@@ -32,7 +32,6 @@ _DAY_ABBREVIATIONS = {
 
 
 def build_schedules(osm_lines, osm_routes, osm_stops, osm_geom, config):
-
     services = {}
     trips = {}
     frequencies = []
@@ -43,7 +42,6 @@ def build_schedules(osm_lines, osm_routes, osm_stops, osm_geom, config):
     departures_by_route_id = config["enumerate_trips"]["departures_by_route_id"]
 
     for line in osm_lines:
-
         for route_index, route_id in enumerate(line.routes_list):
             route = osm_routes.get(route_id)
 
