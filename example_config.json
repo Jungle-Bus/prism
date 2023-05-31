@@ -30,5 +30,8 @@
         "mode" : ["bus", "ferry"],
         "operator": ["divers", "Citrans"]
     },
-    "gtfs_output_name": "GTFS_Abidjan.zip"
+    "gtfs_output_name": "GTFS_Abidjan.zip",
+    "additional_tags_export" : {
+        "stop_point" : ["departures_board"]
+    }
 }

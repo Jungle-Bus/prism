@@ -162,6 +162,11 @@ def export_osm_data(osm_file, outdir, config, output_gtfs, output_csv):
             csvwriter.add_stop_points(osm_transit_data.csv_stop_points)
             csvwriter.add_lines(osm_transit_data.csv_lines)
             csvwriter.add_routes(osm_transit_data.csv_routes)
+            if checked_config.data["additional_tags_export"]:
+                csvwriter.add_additional_tags(
+                    osm_transit_data.csv_additional_tags,
+                    checked_config.data["additional_tags_export"],
+                )
             csv_file_path = os.path.join(outdir, "as_csv.zip")
             csvwriter.write_zipped(csv_file_path)
             logging.info("CSV export saved to {}".format(csv_file_path))

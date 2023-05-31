@@ -78,6 +78,36 @@ def build_csv_stop_points_export(osm_stops, config):
         }
 
 
+def build_csv_additional_tags_export(osm_stops, osm_routes, osm_route_masters, config):
+    tags_export = []
+    additional_tags = config["additional_tags_export"]
+
+    if "stop_point" in additional_tags:
+        for osm_stop in osm_stops.values():
+            stop_export = {
+                k: osm_stop.tags.get(k) for k in additional_tags["stop_point"]
+            }
+            stop_export["object"] = "stop_point"
+            stop_export["id"] = osm_stop.id
+            tags_export.append(stop_export)
+
+    if "route" in additional_tags:
+        for osm_route in osm_routes.values():
+            route_export = {k: osm_route.tags.get(k) for k in additional_tags["route"]}
+            route_export["object"] = "route"
+            route_export["id"] = osm_route.id
+            tags_export.append(route_export)
+
+    if "line" in additional_tags:
+        for osm_line in osm_route_masters:
+            line_export = {k: osm_line.tags.get(k) for k in additional_tags["line"]}
+            line_export["object"] = "line"
+            line_export["id"] = osm_line.id
+            tags_export.append(line_export)
+
+    return tags_export
+
+
 def create_wkt_linestring_from_geom(geom):
     if not geom:
         return ""

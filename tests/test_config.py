@@ -22,6 +22,8 @@ def test_no_config(request):
 
     assert config["gtfs_output_name"] == "output_gtfs.zip"
 
+    assert not config["additional_tags_export"]
+
 
 def test_sample_config(request):
     from_user = {
@@ -46,6 +48,10 @@ def test_sample_config(request):
         "use_network_as_agency": "True",
         "gtfs_output_name": "GTFS_Abidjan.zip",
         "osm_filter": {"mode": ["bus", "ferry"], "operator": ["Citrans"]},
+        "additional_tags_export": {
+            "stop_point": ["shelter"],
+            "route": ["public_transport:version"],
+        },
     }
     config_checked = Configuration(from_user)
     config = config_checked.data
@@ -67,3 +73,8 @@ def test_sample_config(request):
     assert config["feed_info_to_use"]["feed_start_date"] == "20200101"
 
     assert config["gtfs_output_name"] == "GTFS_Abidjan.zip"
+
+    assert config["additional_tags_export"] == {
+        "route": ["public_transport:version"],
+        "stop_point": ["shelter"],
+    }

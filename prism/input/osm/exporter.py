@@ -14,6 +14,7 @@ from prism.output.csv.builders import (
     build_csv_stop_points_export,
     build_csv_lines_export,
     build_csv_routes_export,
+    build_csv_additional_tags_export,
 )
 
 
@@ -67,6 +68,12 @@ class TransitDataExporter(object):
     @property
     def csv_routes(self):
         return build_csv_routes_export(self.relations.routes, self.geom, self.config)
+
+    @property
+    def csv_additional_tags(self):
+        return build_csv_additional_tags_export(
+            self.nodes.stops, self.relations.routes, self.relations.lines, self.config
+        )
 
     def extract(self):
         # Extract relations

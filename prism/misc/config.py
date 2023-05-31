@@ -27,6 +27,7 @@ class Configuration(object):
         self.prepare_feed_info()
         self.prepare_dates()
         self.prepare_gtfs_output_file_name()
+        self.prepare_csv_additional_tag_exports()
 
     def load_config(self, config_args):
         if config_args is None:
@@ -373,3 +374,45 @@ class Configuration(object):
 
         self.data["feed_info_to_use"]["feed_start_date"] = start_date
         self.data["feed_info_to_use"]["feed_end_date"] = end_date
+
+    def prepare_csv_additional_tag_exports(self):
+        """
+        Export some more tags from OSM (in the csv export only)
+        """
+
+        if not "additional_tags_export" in self.from_user:
+            self.data["additional_tags_export"] = None
+            return
+
+        acceptable_tags_categories = ["stop_point", "route", "line"]
+        at_least_one_ok_category = False
+        if self.from_user.get("additional_tags_export"):
+            for filter_type in self.from_user["additional_tags_export"].keys():
+                print()
+                if filter_type in acceptable_tags_categories:
+                    at_least_one_ok_category = True
+                    if (
+                        type(self.from_user["additional_tags_export"][filter_type])
+                        != list
+                    ):
+                        logging.error(
+                            "Invalid values in config file for OSM additional tags export for {}, will be ignored".format(
+                                filter_type
+                            )
+                        )
+                        continue
+                    if not "additional_tags_export" in self.data:
+                        self.data["additional_tags_export"] = {}
+                    self.data["additional_tags_export"][filter_type] = self.from_user[
+                        "additional_tags_export"
+                    ][filter_type]
+                else:
+                    logging.error(
+                        "Invalid tag category {} in config file for OSM additional tags export, will be ignored. Valid categories are stop_point, line and route.".format(
+                            filter_type
+                        )
+                    )
+            if not at_least_one_ok_category:
+                logging.error(
+                    "No valid OSM additional tags export found in config file, no additional tag will be exported"
+                )
