@@ -39,6 +39,13 @@ def build_geom_from_ways(
             # this is a roundabout
             last_roundabout_nodes = current_way.points_list
         elif last_roundabout_nodes:
+            if latlon_list[-1] not in last_roundabout_nodes:
+                logging.warning(
+                    "OSM QA : the geometry of the route {} is not a linestring. Check from {} way".format(
+                        relation_id, way_id
+                    )
+                )
+                return
             roundabout_start_index = last_roundabout_nodes.index(latlon_list[-1])
             if current_way.points_list[0] in last_roundabout_nodes:
                 roundabout_end_index = last_roundabout_nodes.index(
