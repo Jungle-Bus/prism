@@ -6,13 +6,13 @@ Prism is a tool to extract public transport data from OpenStreetMap. It allows y
 
 ## Use
 
-Once installed, *prism* can be used as follow:
+Once installed, *prism* can be used as follows:
 
 `poetry run python prism/cli.py osm_file -gtfs`
 
 `osm_file` is an OSM extract in osm.xml or osm.pbf format. You can get it for instance from [Geofabrik](http://download.geofabrik.de/) or [OSM France](http://download.openstreetmap.fr/extracts/).
 
-If the area covered by your data is large, it is recommanded for performance concerns to filter it to only keep relevant objects, for instance with [osmium]((https://osmcode.org/osmium-tool/)): `osmium tags-filter data.osm.pbf type=route_master type=route -o pt_data.osm.pbf`
+If the area covered by your data is large, it is recommended for performance concerns to filter it to only keep relevant objects, for instance with [osmium]((https://osmcode.org/osmium-tool/)): `osmium tags-filter data.osm.pbf type=route_master type=route -o pt_data.osm.pbf`
 
 An OSM extract example can be found in this repo (`tests/data/osm/abidjan_test_data.osm.pbf`)
 
@@ -24,7 +24,7 @@ You also need to specify one or more output formats:
 * `-gtfs` : to create a [GTFS](https://gtfs.org/reference/static) file
 * `-csv` : to extract transport objets in GeoCSV files (useful for debugging purpose and dataviz applications)
 
-Here is a more detailled example with more parameters: `poetry run python prism/cli.py tests/data/osm/abidjan_test_data.osm.pbf --outdir out/ --loglevel=DEBUG --config example_config.json -csv -gtfs`
+Here is a more detailed example with more parameters: `poetry run python prism/cli.py tests/data/osm/abidjan_test_data.osm.pbf --outdir out/ --loglevel=DEBUG --config example_config.json -csv -gtfs`
 
 ## Install
 
@@ -51,9 +51,9 @@ The *csv* output format creates a zip with several csv files.
 * OSM route_master objects are extracted in the *lines.csv* file
 * OSM route objets are extracted in the *routes.csv* file
 * OSM stops (route members with platform role) are extracted in the stop_points.csv
-* Some additional files comes along, with the links between objects (which stops are belonging to which routes, etc)
+* Some additional files comes along, with the links between objects (which stops belong to which routes, etc.)
 
-A few relevant tags are chosen for each objects and added as dedicated columns in the csv files.
+A few relevant tags are chosen for each object and added as dedicated columns in the csv files.
 
 The stops files have `latitude` and `longitude` columns. The routes and lines files have a `shape` column that contains the computed track of the route, in [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format. Both spreadsheet software or GIS software can be used to open these files.
 
